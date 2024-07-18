@@ -9,7 +9,7 @@ import { useState } from "react";
 import DragDrop from "../create/_components/DragDrop";
 import CreateClubSection from "./_components/CreateClubSection";
 
-const CreateClub = () => {
+const CreateClubPage = () => {
   const [club, setClub] = useState("");
   const [file, setFile] = useState<File>();
   const [clubError, setClubError] = useState<string>("");
@@ -34,6 +34,7 @@ const CreateClub = () => {
       setClubError("모임명을 입력 해주세요.");
       return;
     }
+
     let imageUrl = { publicUrl: "" };
     if (file) {
       const filename = `${Date.now()}.jpg`;
@@ -41,6 +42,7 @@ const CreateClub = () => {
       const { data } = supabase.storage.from("DeepeningProject").getPublicUrl(filename);
       imageUrl = data;
     }
+
     const { data, error } = await supabase.from("Clubs").insert([
       {
         title: club,
@@ -48,12 +50,14 @@ const CreateClub = () => {
         user_id: user?.id,
       },
     ]);
-    if (data) clubRequire("모임 등록에 실패하였습니다.", "/clubs/create");
-    else {
-      clubRequire("모임이 성공적으로 등록되었습니다.", "/clubs");
-      // 클럽 목록 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ["clubs"] });
+
+    if (data) {
+      clubRequire("모임 등록에 실패하였습니다.", "/clubs/create");
+      return;
     }
+    clubRequire("모임이 성공적으로 등록되었습니다.", "/clubs");
+    // 클럽 목록 쿼리 무효화
+    queryClient.invalidateQueries({ queryKey: ["clubs"] });
   };
 
   return (
@@ -64,4 +68,4 @@ const CreateClub = () => {
   );
 };
 
-export default CreateClub;
+export default CreateClubPage;
